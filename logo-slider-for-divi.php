@@ -69,8 +69,22 @@ class LogoSliderForDiviPlugin {
     }
     
     public function init_admin() {
-        require_once LSFD_PLUGIN_DIR . 'includes/admin/class-admin.php';
-        new LSFD_Admin();
+        $admin_file = LSFD_PLUGIN_DIR . 'includes/admin/class-admin.php';
+        if (file_exists($admin_file)) {
+            require_once $admin_file;
+            if (class_exists('LSFD_Admin')) {
+                new LSFD_Admin();
+            } else {
+                add_action('admin_notices', function() use ($admin_file) {
+                    echo '<div class="notice notice-error"><p>Logo Slider for Divi: Admin class not found in ' . esc_html($admin_file) . '.</p></div>';
+                });
+            }
+        } else {
+            add_action('admin_notices', function() use ($admin_file) {
+                echo '<div class="notice notice-error"><p>Logo Slider for Divi: Missing file ' . esc_html($admin_file) . '. Please reinstall the plugin.</p></div>';
+            });
+            error_log('[Logo Slider for Divi] Missing admin file: ' . $admin_file);
+        }
     }
     
     public function init_divi_module() {

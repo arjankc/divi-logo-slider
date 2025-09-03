@@ -25,38 +25,61 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
     }
     
+    /**
+     * Detect Divi Visual Builder reliably (frontend builder)
+     */
+    private function is_visual_builder_active() {
+        if (function_exists('et_core_is_fb_enabled') && et_core_is_fb_enabled()) {
+            return true;
+        }
+        if (function_exists('et_fb_is_enabled') && et_fb_is_enabled()) {
+            return true;
+        }
+        if (isset($_GET['et_fb']) && '1' === $_GET['et_fb']) {
+            return true;
+        }
+        return false;
+    }
+    
     public function enqueue_assets() {
-        // Enqueue Swiper CSS and JS
-        wp_enqueue_style(
-            'swiper-css',
-            'https://unpkg.com/swiper@8/swiper-bundle.min.css',
-            array(),
-            '8.0.0'
-        );
-        
-        wp_enqueue_script(
-            'swiper-js',
-            'https://unpkg.com/swiper@8/swiper-bundle.min.js',
-            array(),
-            '8.0.0',
-            true
-        );
-        
-        // Enqueue plugin assets
+    // Detect Divi Visual Builder
+    $is_vb = $this->is_visual_builder_active();
+
+        // Always enqueue frontend CSS
         wp_enqueue_style(
             'lsfd-frontend-style',
             LSFD_PLUGIN_URL . 'assets/css/frontend.css',
             array(),
             LSFD_PLUGIN_VERSION
         );
-        
-        wp_enqueue_script(
-            'lsfd-frontend-script',
-            LSFD_PLUGIN_URL . 'assets/js/frontend.js',
-            array('jquery', 'swiper-js'),
-            LSFD_PLUGIN_VERSION,
-            true
-        );
+
+        // Only enqueue Swiper and JS when NOT in Visual Builder to avoid VB rendering issues
+        if (!$is_vb) {
+            // Swiper CSS/JS
+            wp_enqueue_style(
+                'swiper-css',
+                'https://unpkg.com/swiper@8/swiper-bundle.min.css',
+                array(),
+                '8.0.0'
+            );
+
+            wp_enqueue_script(
+                'swiper-js',
+                'https://unpkg.com/swiper@8/swiper-bundle.min.js',
+                array(),
+                '8.0.0',
+                true
+            );
+
+            // Plugin frontend behavior (initializes Swiper)
+            wp_enqueue_script(
+                'lsfd-frontend-script',
+                LSFD_PLUGIN_URL . 'assets/js/frontend.js',
+                array('jquery', 'swiper-js'),
+                LSFD_PLUGIN_VERSION,
+                true
+            );
+        }
     }
     
     public function get_fields() {
@@ -323,56 +346,79 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
             return '<div class="lsfd-no-logos"><p>' . esc_html__('No logos to display. Please add logos first.', 'logo-slider-for-divi') . '</p></div>';
         }
         
-        // Generate unique ID for this slider instance
-        $slider_id = 'lsfd-slider-' . wp_rand(1000, 9999);
-        
-        // Build data attributes
-        $data_attrs = array(
-            'data-slides-per-view' => esc_attr($slides_per_view),
-            'data-space-between'   => esc_attr($space_between),
-            'data-slider-speed'    => esc_attr($slider_speed),
-            'data-autoplay'        => esc_attr($autoplay),
-            'data-pause-on-hover'  => esc_attr($pause_on_hover),
-            'data-navigation'      => esc_attr($navigation_arrows),
-            'data-pagination'      => esc_attr($pagination_dots),
-        );
-        
+    // Detect Divi Visual Builder
+    $is_vb = $this->is_visual_builder_active();
+
         ob_start();
-        ?>
-        <div class="lsfd-logo-slider-wrapper">
-            <div id="<?php echo esc_attr($slider_id); ?>" class="lsfd-logo-slider swiper" <?php echo implode(' ', array_map(function($k, $v) { return $k . '="' . $v . '"'; }, array_keys($data_attrs), $data_attrs)); ?>>
-                <div class="swiper-wrapper">
+
+        if ($is_vb) {
+            // Visual Builder: render a simple static grid preview (no JS) to avoid VB script rendering issues
+            ?>
+            <div class="lsfd-logo-slider-wrapper lsfd-vb-preview">
+                <div class="lsfd-vb-grid" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
                     <?php foreach ($logos_data as $logo) : ?>
-                        <div class="swiper-slide">
+                        <div class="lsfd-vb-item" style="flex:0 0 auto;max-width:140px;text-align:center;">
                             <div class="lsfd-logo-item">
-                                <?php if (!empty($logo['url'])) : ?>
-                                    <a href="<?php echo esc_url($logo['url']); ?>" target="_blank" rel="noopener">
-                                <?php endif; ?>
-                                
-                                <img src="<?php echo esc_url($logo['image']); ?>" 
-                                     alt="<?php echo esc_attr($logo['alt']); ?>" 
-                                     title="<?php echo esc_attr($logo['title']); ?>" />
-                                
-                                <?php if (!empty($logo['url'])) : ?>
-                                    </a>
-                                <?php endif; ?>
+                                <img src="<?php echo esc_url($logo['image']); ?>"
+                                     alt="<?php echo esc_attr($logo['alt']); ?>"
+                                     title="<?php echo esc_attr($logo['title']); ?>"
+                                     style="max-width:100%;height:auto;display:inline-block;" />
+                            </div>
+                            <div class="lsfd-vb-title" style="font-size:12px;color:#666;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                <?php echo esc_html($logo['title']); ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
-                
-                <?php if ('on' === $navigation_arrows) : ?>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                <?php endif; ?>
-                
-                <?php if ('on' === $pagination_dots) : ?>
-                    <div class="swiper-pagination"></div>
-                <?php endif; ?>
             </div>
-        </div>
-        <?php
-        
+            <?php
+        } else {
+            // Frontend: render Swiper structure
+            $slider_id = 'lsfd-slider-' . wp_rand(1000, 9999);
+
+            $data_attrs = array(
+                'data-slides-per-view' => esc_attr($slides_per_view),
+                'data-space-between'   => esc_attr($space_between),
+                'data-slider-speed'    => esc_attr($slider_speed),
+                'data-autoplay'        => esc_attr($autoplay),
+                'data-pause-on-hover'  => esc_attr($pause_on_hover),
+                'data-navigation'      => esc_attr($navigation_arrows),
+                'data-pagination'      => esc_attr($pagination_dots),
+            );
+            ?>
+            <div class="lsfd-logo-slider-wrapper">
+                <div id="<?php echo esc_attr($slider_id); ?>" class="lsfd-logo-slider swiper" <?php echo implode(' ', array_map(function($k, $v) { return $k . '="' . $v . '"'; }, array_keys($data_attrs), $data_attrs)); ?>>
+                    <div class="swiper-wrapper">
+                        <?php foreach ($logos_data as $logo) : ?>
+                            <div class="swiper-slide">
+                                <div class="lsfd-logo-item">
+                                    <?php if (!empty($logo['url'])) : ?>
+                                        <a href="<?php echo esc_url($logo['url']); ?>" target="_blank" rel="noopener">
+                                    <?php endif; ?>
+                                    <img src="<?php echo esc_url($logo['image']); ?>"
+                                         alt="<?php echo esc_attr($logo['alt']); ?>"
+                                         title="<?php echo esc_attr($logo['title']); ?>" />
+                                    <?php if (!empty($logo['url'])) : ?>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php if ('on' === $navigation_arrows) : ?>
+                        <div class="swiper-button-next"></div>
+                        <div class="swiper-button-prev"></div>
+                    <?php endif; ?>
+
+                    <?php if ('on' === $pagination_dots) : ?>
+                        <div class="swiper-pagination"></div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php
+        }
+
         return ob_get_clean();
     }
 }

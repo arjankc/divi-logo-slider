@@ -1,6 +1,20 @@
 jQuery(document).ready(function($) {
     'use strict';
     
+    // Detect Divi Visual Builder (common indicators)
+    var isVB = false;
+    try {
+        isVB = (typeof window.ET_Builder !== 'undefined' && window.ET_Builder.is_builder) ||
+               (typeof window.et_fb !== 'undefined' && window.et_fb) ||
+               (typeof window.ET_Builder !== 'undefined' && window.ET_Builder.API && window.ET_Builder.API.Version) ||
+               (typeof et_core_page_resource_fallback !== 'undefined');
+    } catch (e) {}
+
+    // If in Visual Builder, do not initialize Swiper to avoid rendering artifacts in VB
+    if (isVB) {
+        return;
+    }
+
     // Initialize all logo sliders on the page
     initLogoSliders();
     
@@ -146,14 +160,16 @@ jQuery(document).ready(function($) {
     
     // Re-initialize sliders when new content is loaded (e.g., via AJAX)
     $(document).on('et_pb_after_init_modules', function() {
-        // Wait a bit for DOM to be ready
-        setTimeout(initLogoSliders, 100);
+        if (!isVB) {
+            // Wait a bit for DOM to be ready
+            setTimeout(initLogoSliders, 100);
+        }
     });
     
     // Divi Builder compatibility
     if (window.et_pb_custom) {
         window.et_pb_custom.add_custom_init(function() {
-            initLogoSliders();
+            if (!isVB) initLogoSliders();
         });
     }
 });

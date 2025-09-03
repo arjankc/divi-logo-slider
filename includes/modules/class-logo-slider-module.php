@@ -242,30 +242,61 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
     }
     
     public function render($attrs, $content = null, $render_slug) {
-        $logo_source = $this->props['logo_source'];
-        $selected_logos = $this->props['selected_logos'];
-        $custom_logos = $this->props['custom_logos'];
-        $slides_per_view = $this->props['slides_per_view'];
-        $space_between = $this->props['space_between'];
-        $slider_speed = $this->props['slider_speed'];
-        $autoplay = $this->props['autoplay'];
-        $pause_on_hover = $this->props['pause_on_hover'];
+        $logo_source       = $this->props['logo_source'];
+        $selected_logos    = $this->props['selected_logos'];
+        $custom_logos      = $this->props['custom_logos'];
+        $slides_per_view   = $this->props['slides_per_view'];
+        $space_between     = $this->props['space_between'];
+        $slider_speed      = $this->props['slider_speed'];
+        $autoplay          = $this->props['autoplay'];
+        $pause_on_hover    = $this->props['pause_on_hover'];
         $navigation_arrows = $this->props['navigation_arrows'];
-        $pagination_dots = $this->props['pagination_dots'];
-        
+        $pagination_dots   = $this->props['pagination_dots'];
+
         // Prepare logos data
         $logos_data = array();
-        
-        if ('admin' === $logo_source && !empty($selected_logos)) {
-            $logo_ids = explode('|', $selected_logos);
+
+        if ('admin' === $logo_source) {
+            $logo_ids = array();
+
+            if (!empty($selected_logos)) {
+                // Use explicitly selected logos from module settings
+                $raw = trim($selected_logos);
+                $tokens = array($raw);
+                if (strpos($raw, '|') !== false) {
+                    $tokens = explode('|', $raw);
+                } elseif (strpos($raw, ',') !== false) {
+                    $tokens = explode(',', $raw);
+                }
+                $logo_ids = array_filter(array_map(function($v){
+                    return intval(trim($v));
+                }, $tokens));
+            }
+
+            // Fallback to all admin-managed logos if no valid selections resolved
+            if (empty($logo_ids)) {
+                // Fallback: load all admin-managed logos in menu_order
+                $logos = get_posts(array(
+                    'post_type'        => 'lsfd_logo',
+                    'posts_per_page'   => -1,
+                    'post_status'      => 'publish',
+                    'orderby'          => 'menu_order',
+                    'order'            => 'ASC',
+                    'suppress_filters' => true,
+                ));
+                if (!empty($logos)) {
+                    $logo_ids = wp_list_pluck($logos, 'ID');
+                }
+            }
+
             foreach ($logo_ids as $logo_id) {
                 if (empty($logo_id)) continue;
-                
+
                 $image = get_post_meta($logo_id, 'logo_image', true);
-                $url = get_post_meta($logo_id, 'logo_url', true);
-                $alt = get_post_meta($logo_id, 'logo_alt', true);
+                $url   = get_post_meta($logo_id, 'logo_url', true);
+                $alt   = get_post_meta($logo_id, 'logo_alt', true);
                 $title = get_the_title($logo_id);
-                
+
                 if ($image) {
                     $logos_data[] = array(
                         'image' => $image,

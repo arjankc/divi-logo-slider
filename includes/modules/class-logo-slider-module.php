@@ -352,23 +352,14 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
         ob_start();
 
         if ($is_vb) {
-            // Visual Builder: render a simple static grid preview (no JS) to avoid VB script rendering issues
+            // Visual Builder: render a minimal placeholder box (no JS, no images)
+            $count = count($logos_data);
             ?>
-            <div class="lsfd-logo-slider-wrapper lsfd-vb-preview">
-                <div class="lsfd-vb-grid" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
-                    <?php foreach ($logos_data as $logo) : ?>
-                        <div class="lsfd-vb-item" style="flex:0 0 auto;max-width:140px;text-align:center;">
-                            <div class="lsfd-logo-item">
-                                <img src="<?php echo esc_url($logo['image']); ?>"
-                                     alt="<?php echo esc_attr($logo['alt']); ?>"
-                                     title="<?php echo esc_attr($logo['title']); ?>"
-                                     style="max-width:100%;height:auto;display:inline-block;" />
-                            </div>
-                            <div class="lsfd-vb-title" style="font-size:12px;color:#666;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                <?php echo esc_html($logo['title']); ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+            <div class="lsfd-vb-placeholder" style="border:1px dashed #cbd5e1;background:#f8fafc;padding:16px;border-radius:6px;display:flex;align-items:center;gap:12px;min-height:56px;">
+                <div style="width:28px;height:28px;border-radius:4px;background:#e2e8f0;display:inline-block;"></div>
+                <div>
+                    <div style="font-weight:600;color:#111827;">Logo Slider</div>
+                    <div style="font-size:12px;color:#6b7280;">Preview disabled in builder<?php echo $count ? ' • ' . intval($count) . ' logo' . ($count>1?'s':'') : ''; ?></div>
                 </div>
             </div>
             <?php
@@ -380,10 +371,11 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
                 'data-slides-per-view' => esc_attr($slides_per_view),
                 'data-space-between'   => esc_attr($space_between),
                 'data-slider-speed'    => esc_attr($slider_speed),
-                'data-autoplay'        => esc_attr($autoplay),
-                'data-pause-on-hover'  => esc_attr($pause_on_hover),
-                'data-navigation'      => esc_attr($navigation_arrows),
-                'data-pagination'      => esc_attr($pagination_dots),
+                // Force behavior: autoplay on, no nav/pagination for smooth auto scroll
+                'data-autoplay'        => 'on',
+                'data-pause-on-hover'  => 'off',
+                'data-navigation'      => 'off',
+                'data-pagination'      => 'off',
             );
             ?>
             <div class="lsfd-logo-slider-wrapper">
@@ -406,14 +398,7 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
                         <?php endforeach; ?>
                     </div>
 
-                    <?php if ('on' === $navigation_arrows) : ?>
-                        <div class="swiper-button-next"></div>
-                        <div class="swiper-button-prev"></div>
-                    <?php endif; ?>
-
-                    <?php if ('on' === $pagination_dots) : ?>
-                        <div class="swiper-pagination"></div>
-                    <?php endif; ?>
+                    <!-- Navigation and pagination intentionally omitted for continuous auto-scroll -->
                 </div>
             </div>
             <?php

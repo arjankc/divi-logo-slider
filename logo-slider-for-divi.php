@@ -57,6 +57,9 @@ class LogoSliderForDiviPlugin {
         
         // Initialize Divi module
         add_action('et_builder_ready', array($this, 'init_divi_module'));
+
+    // Shortcode fallback to render slider when shortcode text appears in content
+    add_action('init', array($this, 'register_shortcode'));
     }
     
     public function init() {
@@ -91,6 +94,92 @@ class LogoSliderForDiviPlugin {
         if (class_exists('ET_Builder_Module')) {
             require_once LSFD_PLUGIN_DIR . 'includes/modules/class-logo-slider-module.php';
         }
+    }
+
+    public function register_shortcode() {
+        add_shortcode('lsfd_logo_slider', function($atts) {
+            $atts = shortcode_atts(array(
+                'slides_per_view' => 5,
+                'space_between'   => 30,
+            ), $atts, 'lsfd_logo_slider');
+
+            // Load all admin-managed logos
+            $logos = get_posts(array(
+                'post_type'      => 'lsfd_logo',
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'orderby'        => 'menu_order',
+                'order'          => 'ASC',
+            ));
+
+            if (empty($logos)) {
+                return '<div class="lsfd-no-logos"><p>' . esc_html__('No logos to display. Please add logos first.', 'logo-slider-for-divi') . '</p></div>';
+            }
+
+            $logos_data = array();
+            foreach ($logos as $logo) {
+                $image = get_post_meta($logo->ID, 'logo_image', true);
+                $url   = get_post_meta($logo->ID, 'logo_url', true);
+                $alt   = get_post_meta($logo->ID, 'logo_alt', true);
+                $title = get_the_title($logo->ID);
+                if ($image) {
+                    $logos_data[] = array(
+                        'image' => $image,
+                        'url'   => $url,
+                        'alt'   => $alt ?: $title,
+                        'title' => $title,
+                    );
+                }
+            }
+
+            if (empty($logos_data)) {
+                return '<div class="lsfd-no-logos"><p>' . esc_html__('No logos to display. Please add logos first.', 'logo-slider-for-divi') . '</p></div>';
+            }
+
+            // Ensure assets are enqueued when used via shortcode
+            if (!is_admin()) {
+                // Mimic module's enqueue: CSS only (JS enqueued via wp_footer when needed)
+                wp_enqueue_style('lsfd-frontend-style', LSFD_PLUGIN_URL . 'assets/css/frontend.css', array(), LSFD_PLUGIN_VERSION);
+                wp_enqueue_style('swiper-css', 'https://unpkg.com/swiper@8/swiper-bundle.min.css', array(), '8.0.0');
+                wp_enqueue_script('swiper-js', 'https://unpkg.com/swiper@8/swiper-bundle.min.js', array(), '8.0.0', true);
+                wp_enqueue_script('lsfd-frontend-script', LSFD_PLUGIN_URL . 'assets/js/frontend.js', array('jquery', 'swiper-js'), LSFD_PLUGIN_VERSION, true);
+            }
+
+            $slider_id = 'lsfd-slider-' . wp_rand(1000, 9999);
+            $data_attrs = array(
+                'data-slides-per-view' => esc_attr(intval($atts['slides_per_view'])),
+                'data-space-between'   => esc_attr(intval($atts['space_between'])),
+                'data-slider-speed'    => 500,
+                'data-autoplay'        => 'on',
+                'data-pause-on-hover'  => 'off',
+                'data-navigation'      => 'off',
+                'data-pagination'      => 'off',
+            );
+
+            ob_start();
+            ?>
+            <div class="lsfd-logo-slider-wrapper">
+                <div id="<?php echo esc_attr($slider_id); ?>" class="lsfd-logo-slider swiper" <?php echo implode(' ', array_map(function($k, $v) { return $k . '="' . $v . '"'; }, array_keys($data_attrs), $data_attrs)); ?>>
+                    <div class="swiper-wrapper">
+                        <?php foreach ($logos_data as $logo) : ?>
+                            <div class="swiper-slide">
+                                <div class="lsfd-logo-item">
+                                    <?php if (!empty($logo['url'])) : ?>
+                                        <a href="<?php echo esc_url($logo['url']); ?>" target="_blank" rel="noopener">
+                                    <?php endif; ?>
+                                    <img src="<?php echo esc_url($logo['image']); ?>" alt="<?php echo esc_attr($logo['alt']); ?>" title="<?php echo esc_attr($logo['title']); ?>" />
+                                    <?php if (!empty($logo['url'])) : ?>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <?php
+            return ob_get_clean();
+        });
     }
     
     public function register_logo_post_type() {

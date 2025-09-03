@@ -46,19 +46,21 @@ jQuery(document).ready(function($) {
         const sliderSpeed = parseInt($slider.data('slider-speed')) || 500;
         const autoplay = $slider.data('autoplay') === 'on';
         const pauseOnHover = $slider.data('pause-on-hover') === 'on';
-        const navigation = $slider.data('navigation') === 'on';
-        const pagination = $slider.data('pagination') === 'on';
+    // Force: no navigation or pagination; smooth continuous autoplay
+    const navigation = false;
+    const pagination = false;
         
         // Base configuration
         const config = {
             slidesPerView: slidesPerView,
             spaceBetween: spaceBetween,
-            speed: sliderSpeed,
+            speed: Math.max(sliderSpeed, 6000), // slow speed for smooth continuous motion
             loop: true,
-            loopAdditionalSlides: 2,
+            loopAdditionalSlides: 4,
             watchSlidesProgress: true,
             watchSlidesVisibility: true,
             preventInteractionOnTransition: true,
+            allowTouchMove: false,
             
             // Responsive breakpoints
             breakpoints: {
@@ -82,33 +84,19 @@ jQuery(document).ready(function($) {
         };
         
         // Add autoplay if enabled
-        if (autoplay) {
-            config.autoplay = {
-                delay: 3000,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: pauseOnHover,
-                reverseDirection: false
-            };
-        }
+        // Force autoplay with minimal delay to simulate continuous scroll
+        config.autoplay = {
+            delay: 1,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: false,
+            waitForTransition: false
+        };
         
         // Add navigation if enabled
-        if (navigation) {
-            config.navigation = {
-                nextEl: $slider.find('.swiper-button-next')[0],
-                prevEl: $slider.find('.swiper-button-prev')[0],
-                disabledClass: 'swiper-button-disabled'
-            };
-        }
+    // Navigation removed
         
         // Add pagination if enabled
-        if (pagination) {
-            config.pagination = {
-                el: $slider.find('.swiper-pagination')[0],
-                clickable: true,
-                dynamicBullets: false,
-                type: 'bullets'
-            };
-        }
+    // Pagination removed
         
         // Store config for hover handling
         config.pauseOnHover = pauseOnHover;
@@ -174,11 +162,4 @@ jQuery(document).ready(function($) {
     }
 });
 
-// Expose functions for potential external use
-window.LSFDLogoSlider = {
-    init: function() {
-        jQuery(document).ready(function($) {
-            initLogoSliders();
-        });
-    }
-};
+// No global exports

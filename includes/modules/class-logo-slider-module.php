@@ -378,6 +378,7 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
                 'data-pagination'      => 'off',
                 // New: pause between slides (ms)
                 'data-autoplay-delay'  => '2000',
+                'data-loop'            => 'on',
             );
             ?>
             <div class="lsfd-logo-slider-wrapper">

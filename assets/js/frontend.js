@@ -43,65 +43,35 @@ jQuery(document).ready(function($) {
         // Get data attributes with defaults
         const slidesPerView = parseInt($slider.data('slides-per-view')) || 5;
         const spaceBetween = parseInt($slider.data('space-between')) || 30;
-    const sliderSpeed = parseInt($slider.data('slider-speed')) || 500;
-    const autoplayDelay = parseInt($slider.data('autoplay-delay')) || 2000;
+        const sliderSpeed = parseInt($slider.data('slider-speed')) || 5000; // Use a longer speed for continuous effect
         const autoplay = $slider.data('autoplay') === 'on';
         const pauseOnHover = $slider.data('pause-on-hover') === 'on';
-    // Force: no navigation or pagination; smooth continuous autoplay
-    const navigation = false;
-    const pagination = false;
-        
-        // Base configuration
+        const loop = $slider.data('loop') === 'on';
+
+        // Base configuration for continuous scrolling
         const config = {
-            slidesPerView: slidesPerView,
+            slidesPerView: 'auto',
             spaceBetween: spaceBetween,
-            speed: Math.max(sliderSpeed, 400), // smooth but snappy per-slide transition
-            loop: true,
-            loopAdditionalSlides: 2,
-            watchSlidesProgress: true,
-            watchSlidesVisibility: true,
+            speed: sliderSpeed,
+            loop: loop,
             preventInteractionOnTransition: true,
             allowTouchMove: false,
-            slidesPerGroup: 1,
-            
-            // Responsive breakpoints
-            breakpoints: {
-                320: {
-                    slidesPerView: Math.min(slidesPerView, 2),
-                    spaceBetween: Math.max(spaceBetween * 0.5, 15)
-                },
-                768: {
-                    slidesPerView: Math.min(slidesPerView, 3),
-                    spaceBetween: Math.max(spaceBetween * 0.7, 20)
-                },
-                1024: {
-                    slidesPerView: Math.min(slidesPerView, 4),
-                    spaceBetween: Math.max(spaceBetween * 0.8, 25)
-                },
-                1200: {
-                    slidesPerView: slidesPerView,
-                    spaceBetween: spaceBetween
-                }
-            }
         };
-        
+
         // Add autoplay if enabled
-        // Step-by-step autoplay: pause between moves, one slide at a time
-        config.autoplay = {
-            delay: autoplayDelay,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: false,
-            waitForTransition: false
-        };
-        
-        // Add navigation if enabled
-    // Navigation removed
-        
-        // Add pagination if enabled
-    // Pagination removed
-        
-        // Store config for hover handling
-        config.pauseOnHover = pauseOnHover;
+        if (autoplay) {
+            config.autoplay = {
+                delay: 0,
+                disableOnInteraction: false,
+            };
+        }
+
+        // Add pause on hover if enabled
+        if (pauseOnHover) {
+            if(config.autoplay){
+                config.autoplay.pauseOnMouseEnter = true;
+            }
+        }
         
         return config;
     }

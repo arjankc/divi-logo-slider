@@ -197,3 +197,11 @@
     box-shadow: none;
     margin: 0;
 }
+
+.lsfd-logo-slider .swiper-wrapper {
+    transition-timing-function: linear !important;
+}
+
+.lsfd-logo-slider .swiper-slide {
+    width: auto;
+}

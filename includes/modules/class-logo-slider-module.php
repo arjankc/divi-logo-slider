@@ -1,0 +1,350 @@
+<?php
+/**
+ * Logo Slider Divi Module
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class LSFD_LogoSliderModule extends ET_Builder_Module {
+    
+    public $slug       = 'lsfd_logo_slider';
+    public $vb_support = 'on';
+    
+    protected $module_credits = array(
+        'module_uri' => 'https://github.com/Gurkha-Technology-Open-Source/divi-logo-slider',
+        'author'     => 'Gurkha Technology',
+        'author_uri' => 'https://github.com/Gurkha-Technology-Open-Source',
+    );
+    
+    public function init() {
+        $this->name = esc_html__('Logo Slider', 'logo-slider-for-divi');
+        $this->icon_path = LSFD_PLUGIN_DIR . 'assets/images/logo-slider-icon.svg';
+        
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
+    }
+    
+    public function enqueue_assets() {
+        // Enqueue Swiper CSS and JS
+        wp_enqueue_style(
+            'swiper-css',
+            'https://unpkg.com/swiper@8/swiper-bundle.min.css',
+            array(),
+            '8.0.0'
+        );
+        
+        wp_enqueue_script(
+            'swiper-js',
+            'https://unpkg.com/swiper@8/swiper-bundle.min.js',
+            array(),
+            '8.0.0',
+            true
+        );
+        
+        // Enqueue plugin assets
+        wp_enqueue_style(
+            'lsfd-frontend-style',
+            LSFD_PLUGIN_URL . 'assets/css/frontend.css',
+            array(),
+            LSFD_PLUGIN_VERSION
+        );
+        
+        wp_enqueue_script(
+            'lsfd-frontend-script',
+            LSFD_PLUGIN_URL . 'assets/js/frontend.js',
+            array('jquery', 'swiper-js'),
+            LSFD_PLUGIN_VERSION,
+            true
+        );
+    }
+    
+    public function get_fields() {
+        $admin_logos = $this->get_admin_logos_options();
+        
+        return array(
+            'logo_source' => array(
+                'label'           => esc_html__('Logo Source', 'logo-slider-for-divi'),
+                'type'            => 'select',
+                'option_category' => 'basic_option',
+                'options'         => array(
+                    'admin'  => esc_html__('Use Admin Managed Logos', 'logo-slider-for-divi'),
+                    'custom' => esc_html__('Add Custom Logos', 'logo-slider-for-divi'),
+                ),
+                'default'         => 'admin',
+                'affects'         => array('selected_logos', 'custom_logos'),
+                'tab_slug'        => 'general',
+                'toggle_slug'     => 'main_content',
+            ),
+            'selected_logos' => array(
+                'label'           => esc_html__('Select Logos', 'logo-slider-for-divi'),
+                'type'            => 'multiple_checkboxes',
+                'option_category' => 'basic_option',
+                'options'         => $admin_logos,
+                'depends_show_if' => 'admin',
+                'tab_slug'        => 'general',
+                'toggle_slug'     => 'main_content',
+            ),
+            'custom_logos' => array(
+                'label'           => esc_html__('Custom Logos', 'logo-slider-for-divi'),
+                'type'            => 'composite',
+                'option_category' => 'basic_option',
+                'composite_type'  => 'add_new',
+                'depends_show_if' => 'custom',
+                'tab_slug'        => 'general',
+                'toggle_slug'     => 'main_content',
+                'composite_structure' => array(
+                    'image' => array(
+                        'label'              => esc_html__('Logo Image', 'logo-slider-for-divi'),
+                        'type'               => 'upload',
+                        'option_category'    => 'basic_option',
+                        'upload_button_text' => esc_attr__('Upload an image', 'logo-slider-for-divi'),
+                        'choose_text'        => esc_attr__('Choose an Image', 'logo-slider-for-divi'),
+                        'update_text'        => esc_attr__('Set As Image', 'logo-slider-for-divi'),
+                    ),
+                    'url' => array(
+                        'label'           => esc_html__('Logo URL', 'logo-slider-for-divi'),
+                        'type'            => 'text',
+                        'option_category' => 'basic_option',
+                    ),
+                    'alt' => array(
+                        'label'           => esc_html__('Alt Text', 'logo-slider-for-divi'),
+                        'type'            => 'text',
+                        'option_category' => 'basic_option',
+                    ),
+                ),
+            ),
+            'slides_per_view' => array(
+                'label'           => esc_html__('Logos per View', 'logo-slider-for-divi'),
+                'type'            => 'range',
+                'option_category' => 'layout',
+                'default'         => '5',
+                'range_settings'  => array(
+                    'min'  => '1',
+                    'max'  => '10',
+                    'step' => '1',
+                ),
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'slider_settings',
+            ),
+            'space_between' => array(
+                'label'           => esc_html__('Space Between Logos', 'logo-slider-for-divi'),
+                'type'            => 'range',
+                'option_category' => 'layout',
+                'default'         => '30',
+                'range_settings'  => array(
+                    'min'  => '0',
+                    'max'  => '100',
+                    'step' => '1',
+                ),
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'slider_settings',
+            ),
+            'slider_speed' => array(
+                'label'           => esc_html__('Slider Speed (ms)', 'logo-slider-for-divi'),
+                'type'            => 'range',
+                'option_category' => 'layout',
+                'default'         => '500',
+                'range_settings'  => array(
+                    'min'  => '100',
+                    'max'  => '2000',
+                    'step' => '100',
+                ),
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'slider_settings',
+            ),
+            'autoplay' => array(
+                'label'           => esc_html__('Autoplay', 'logo-slider-for-divi'),
+                'type'            => 'yes_no_button',
+                'option_category' => 'configuration',
+                'options'         => array(
+                    'on'  => esc_html__('On', 'logo-slider-for-divi'),
+                    'off' => esc_html__('Off', 'logo-slider-for-divi'),
+                ),
+                'default'         => 'on',
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'slider_settings',
+            ),
+            'pause_on_hover' => array(
+                'label'           => esc_html__('Pause on Hover', 'logo-slider-for-divi'),
+                'type'            => 'yes_no_button',
+                'option_category' => 'configuration',
+                'options'         => array(
+                    'on'  => esc_html__('On', 'logo-slider-for-divi'),
+                    'off' => esc_html__('Off', 'logo-slider-for-divi'),
+                ),
+                'default'         => 'on',
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'slider_settings',
+            ),
+            'navigation_arrows' => array(
+                'label'           => esc_html__('Navigation Arrows', 'logo-slider-for-divi'),
+                'type'            => 'yes_no_button',
+                'option_category' => 'configuration',
+                'options'         => array(
+                    'on'  => esc_html__('On', 'logo-slider-for-divi'),
+                    'off' => esc_html__('Off', 'logo-slider-for-divi'),
+                ),
+                'default'         => 'on',
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'navigation',
+            ),
+            'pagination_dots' => array(
+                'label'           => esc_html__('Pagination Dots', 'logo-slider-for-divi'),
+                'type'            => 'yes_no_button',
+                'option_category' => 'configuration',
+                'options'         => array(
+                    'on'  => esc_html__('On', 'logo-slider-for-divi'),
+                    'off' => esc_html__('Off', 'logo-slider-for-divi'),
+                ),
+                'default'         => 'on',
+                'tab_slug'        => 'advanced',
+                'toggle_slug'     => 'navigation',
+            ),
+        );
+    }
+    
+    public function get_settings_modal_toggles() {
+        return array(
+            'general' => array(
+                'toggles' => array(
+                    'main_content' => esc_html__('Logo Content', 'logo-slider-for-divi'),
+                ),
+            ),
+            'advanced' => array(
+                'toggles' => array(
+                    'slider_settings' => esc_html__('Slider Settings', 'logo-slider-for-divi'),
+                    'navigation' => esc_html__('Navigation', 'logo-slider-for-divi'),
+                ),
+            ),
+        );
+    }
+    
+    private function get_admin_logos_options() {
+        $logos = get_posts(array(
+            'post_type'      => 'lsfd_logo',
+            'numberposts'    => -1,
+            'orderby'        => 'menu_order',
+            'order'          => 'ASC',
+            'post_status'    => 'publish'
+        ));
+        
+        $options = array();
+        foreach ($logos as $logo) {
+            $options[$logo->ID] = $logo->post_title;
+        }
+        
+        if (empty($options)) {
+            $options[''] = esc_html__('No logos found. Please add logos in the admin first.', 'logo-slider-for-divi');
+        }
+        
+        return $options;
+    }
+    
+    public function render($attrs, $content = null, $render_slug) {
+        $logo_source = $this->props['logo_source'];
+        $selected_logos = $this->props['selected_logos'];
+        $custom_logos = $this->props['custom_logos'];
+        $slides_per_view = $this->props['slides_per_view'];
+        $space_between = $this->props['space_between'];
+        $slider_speed = $this->props['slider_speed'];
+        $autoplay = $this->props['autoplay'];
+        $pause_on_hover = $this->props['pause_on_hover'];
+        $navigation_arrows = $this->props['navigation_arrows'];
+        $pagination_dots = $this->props['pagination_dots'];
+        
+        // Prepare logos data
+        $logos_data = array();
+        
+        if ('admin' === $logo_source && !empty($selected_logos)) {
+            $logo_ids = explode('|', $selected_logos);
+            foreach ($logo_ids as $logo_id) {
+                if (empty($logo_id)) continue;
+                
+                $image = get_post_meta($logo_id, 'logo_image', true);
+                $url = get_post_meta($logo_id, 'logo_url', true);
+                $alt = get_post_meta($logo_id, 'logo_alt', true);
+                $title = get_the_title($logo_id);
+                
+                if ($image) {
+                    $logos_data[] = array(
+                        'image' => $image,
+                        'url'   => $url,
+                        'alt'   => $alt ?: $title,
+                        'title' => $title,
+                    );
+                }
+            }
+        } elseif ('custom' === $logo_source && $custom_logos) {
+            foreach ($custom_logos as $logo) {
+                if (!empty($logo['image'])) {
+                    $logos_data[] = array(
+                        'image' => $logo['image'],
+                        'url'   => $logo['url'],
+                        'alt'   => $logo['alt'],
+                        'title' => $logo['alt'],
+                    );
+                }
+            }
+        }
+        
+        if (empty($logos_data)) {
+            return '<div class="lsfd-no-logos"><p>' . esc_html__('No logos to display. Please add logos first.', 'logo-slider-for-divi') . '</p></div>';
+        }
+        
+        // Generate unique ID for this slider instance
+        $slider_id = 'lsfd-slider-' . wp_rand(1000, 9999);
+        
+        // Build data attributes
+        $data_attrs = array(
+            'data-slides-per-view' => esc_attr($slides_per_view),
+            'data-space-between'   => esc_attr($space_between),
+            'data-slider-speed'    => esc_attr($slider_speed),
+            'data-autoplay'        => esc_attr($autoplay),
+            'data-pause-on-hover'  => esc_attr($pause_on_hover),
+            'data-navigation'      => esc_attr($navigation_arrows),
+            'data-pagination'      => esc_attr($pagination_dots),
+        );
+        
+        ob_start();
+        ?>
+        <div class="lsfd-logo-slider-wrapper">
+            <div id="<?php echo esc_attr($slider_id); ?>" class="lsfd-logo-slider swiper" <?php echo implode(' ', array_map(function($k, $v) { return $k . '="' . $v . '"'; }, array_keys($data_attrs), $data_attrs)); ?>>
+                <div class="swiper-wrapper">
+                    <?php foreach ($logos_data as $logo) : ?>
+                        <div class="swiper-slide">
+                            <div class="lsfd-logo-item">
+                                <?php if (!empty($logo['url'])) : ?>
+                                    <a href="<?php echo esc_url($logo['url']); ?>" target="_blank" rel="noopener">
+                                <?php endif; ?>
+                                
+                                <img src="<?php echo esc_url($logo['image']); ?>" 
+                                     alt="<?php echo esc_attr($logo['alt']); ?>" 
+                                     title="<?php echo esc_attr($logo['title']); ?>" />
+                                
+                                <?php if (!empty($logo['url'])) : ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <?php if ('on' === $navigation_arrows) : ?>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                <?php endif; ?>
+                
+                <?php if ('on' === $pagination_dots) : ?>
+                    <div class="swiper-pagination"></div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+        
+        return ob_get_clean();
+    }
+}
+
+// Register the module
+new LSFD_LogoSliderModule();

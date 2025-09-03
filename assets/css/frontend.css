@@ -1,0 +1,199 @@
+/* Frontend styles for Logo Slider */
+
+.lsfd-logo-slider-wrapper {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.lsfd-logo-slider {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.lsfd-logo-slider .swiper-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.lsfd-logo-slider .swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+}
+
+.lsfd-logo-item {
+    display: block;
+    width: 100%;
+    text-align: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.lsfd-logo-item:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+
+.lsfd-logo-item a {
+    display: block;
+    text-decoration: none;
+    outline: none;
+}
+
+.lsfd-logo-item img {
+    max-width: 100%;
+    height: auto;
+    max-height: 80px;
+    width: auto;
+    object-fit: contain;
+    transition: all 0.3s ease;
+}
+
+/* Navigation Arrows */
+.lsfd-logo-slider .swiper-button-next,
+.lsfd-logo-slider .swiper-button-prev {
+    color: #333;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.lsfd-logo-slider .swiper-button-next:hover,
+.lsfd-logo-slider .swiper-button-prev:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #007cba;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.lsfd-logo-slider .swiper-button-next::after,
+.lsfd-logo-slider .swiper-button-prev::after {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.lsfd-logo-slider .swiper-button-disabled {
+    opacity: 0.3;
+}
+
+/* Pagination Dots */
+.lsfd-logo-slider .swiper-pagination {
+    bottom: -30px;
+    position: relative;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.lsfd-logo-slider .swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    background: #ddd;
+    border-radius: 50%;
+    opacity: 1;
+    margin: 0 4px;
+    transition: all 0.3s ease;
+}
+
+.lsfd-logo-slider .swiper-pagination-bullet-active {
+    background: #007cba;
+    transform: scale(1.2);
+}
+
+/* No Logos State */
+.lsfd-no-logos {
+    padding: 40px 20px;
+    text-align: center;
+    background: #f9f9f9;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .lsfd-logo-item img {
+        max-height: 60px;
+    }
+    
+    .lsfd-logo-slider .swiper-button-next,
+    .lsfd-logo-slider .swiper-button-prev {
+        width: 35px;
+        height: 35px;
+        margin-top: -17.5px;
+    }
+    
+    .lsfd-logo-slider .swiper-button-next::after,
+    .lsfd-logo-slider .swiper-button-prev::after {
+        font-size: 12px;
+    }
+    
+    .lsfd-logo-slider .swiper-pagination {
+        bottom: -25px;
+        margin-top: 15px;
+    }
+    
+    .lsfd-logo-slider .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        margin: 0 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lsfd-logo-item img {
+        max-height: 50px;
+    }
+    
+    .lsfd-logo-slider .swiper-button-next,
+    .lsfd-logo-slider .swiper-button-prev {
+        display: none; /* Hide arrows on very small screens */
+    }
+}
+
+/* Loading Animation */
+@keyframes lsfd-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.lsfd-logo-slider-wrapper {
+    animation: lsfd-fade-in 0.6s ease-out;
+}
+
+/* Grayscale Effect (Optional Enhancement) */
+.lsfd-logo-slider.grayscale-hover .lsfd-logo-item img {
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+}
+
+.lsfd-logo-slider.grayscale-hover .lsfd-logo-item:hover img {
+    filter: grayscale(0%);
+}
+
+/* Custom Theme Compatibility */
+.et_pb_module .lsfd-logo-slider-wrapper {
+    margin: 0;
+}
+
+.et_pb_module .lsfd-logo-item a {
+    border: none;
+    box-shadow: none;
+}
+
+.et_pb_module .lsfd-logo-item img {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+}

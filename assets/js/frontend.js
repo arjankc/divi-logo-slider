@@ -43,30 +43,48 @@ jQuery(document).ready(function($) {
         // Get data attributes with defaults
         const slidesPerView = parseInt($slider.data('slides-per-view')) || 5;
         const spaceBetween = parseInt($slider.data('space-between')) || 30;
-        const sliderSpeed = parseInt($slider.data('slider-speed')) || 5000; // Use a longer speed for continuous effect
+        const sliderSpeed = parseInt($slider.data('slider-speed')) || 500;
+        const autoplayDelay = parseInt($slider.data('autoplay-delay')) || 2000;
         const autoplay = $slider.data('autoplay') === 'on';
         const pauseOnHover = $slider.data('pause-on-hover') === 'on';
         const loop = $slider.data('loop') === 'on';
 
-        // Base configuration for continuous scrolling
+        // Base configuration
         const config = {
-            slidesPerView: 'auto',
+            slidesPerView: slidesPerView,
             spaceBetween: spaceBetween,
             speed: sliderSpeed,
             loop: loop,
-            preventInteractionOnTransition: true,
-            allowTouchMove: false,
+            
+            // Responsive breakpoints
+            breakpoints: {
+                320: {
+                    slidesPerView: Math.min(slidesPerView, 2),
+                    spaceBetween: Math.max(spaceBetween * 0.5, 15)
+                },
+                768: {
+                    slidesPerView: Math.min(slidesPerView, 3),
+                    spaceBetween: Math.max(spaceBetween * 0.7, 20)
+                },
+                1024: {
+                    slidesPerView: Math.min(slidesPerView, 4),
+                    spaceBetween: Math.max(spaceBetween * 0.8, 25)
+                },
+                1200: {
+                    slidesPerView: slidesPerView,
+                    spaceBetween: spaceBetween
+                }
+            }
         };
 
         // Add autoplay if enabled
         if (autoplay) {
             config.autoplay = {
-                delay: 0,
+                delay: autoplayDelay,
                 disableOnInteraction: false,
             };
         }
 
-        // Add pause on hover if enabled
         if (pauseOnHover) {
             if(config.autoplay){
                 config.autoplay.pauseOnMouseEnter = true;

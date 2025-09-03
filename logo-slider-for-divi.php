@@ -154,6 +154,7 @@ class LogoSliderForDiviPlugin {
                 'data-pause-on-hover'  => 'off',
                 'data-navigation'      => 'off',
                 'data-pagination'      => 'off',
+                'data-autoplay-delay'  => '2000',
             );
 
             ob_start();

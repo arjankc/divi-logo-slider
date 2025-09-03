@@ -43,7 +43,8 @@ jQuery(document).ready(function($) {
         // Get data attributes with defaults
         const slidesPerView = parseInt($slider.data('slides-per-view')) || 5;
         const spaceBetween = parseInt($slider.data('space-between')) || 30;
-        const sliderSpeed = parseInt($slider.data('slider-speed')) || 500;
+    const sliderSpeed = parseInt($slider.data('slider-speed')) || 500;
+    const autoplayDelay = parseInt($slider.data('autoplay-delay')) || 2000;
         const autoplay = $slider.data('autoplay') === 'on';
         const pauseOnHover = $slider.data('pause-on-hover') === 'on';
     // Force: no navigation or pagination; smooth continuous autoplay
@@ -54,13 +55,14 @@ jQuery(document).ready(function($) {
         const config = {
             slidesPerView: slidesPerView,
             spaceBetween: spaceBetween,
-            speed: Math.max(sliderSpeed, 6000), // slow speed for smooth continuous motion
+            speed: Math.max(sliderSpeed, 400), // smooth but snappy per-slide transition
             loop: true,
-            loopAdditionalSlides: 4,
+            loopAdditionalSlides: 2,
             watchSlidesProgress: true,
             watchSlidesVisibility: true,
             preventInteractionOnTransition: true,
             allowTouchMove: false,
+            slidesPerGroup: 1,
             
             // Responsive breakpoints
             breakpoints: {
@@ -84,9 +86,9 @@ jQuery(document).ready(function($) {
         };
         
         // Add autoplay if enabled
-        // Force autoplay with minimal delay to simulate continuous scroll
+        // Step-by-step autoplay: pause between moves, one slide at a time
         config.autoplay = {
-            delay: 1,
+            delay: autoplayDelay,
             disableOnInteraction: false,
             pauseOnMouseEnter: false,
             waitForTransition: false

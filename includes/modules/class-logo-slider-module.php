@@ -371,11 +371,13 @@ class LSFD_LogoSliderModule extends ET_Builder_Module {
                 'data-slides-per-view' => esc_attr($slides_per_view),
                 'data-space-between'   => esc_attr($space_between),
                 'data-slider-speed'    => esc_attr($slider_speed),
-                // Force behavior: autoplay on, no nav/pagination for smooth auto scroll
+                // Force behavior: autoplay on, no nav/pagination
                 'data-autoplay'        => 'on',
                 'data-pause-on-hover'  => 'off',
                 'data-navigation'      => 'off',
                 'data-pagination'      => 'off',
+                // New: pause between slides (ms)
+                'data-autoplay-delay'  => '2000',
             );
             ?>
             <div class="lsfd-logo-slider-wrapper">

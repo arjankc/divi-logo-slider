@@ -49,7 +49,7 @@ class LSFD_Admin {
         wp_enqueue_script(
             'lsfd-admin-script',
             LSFD_PLUGIN_URL . 'assets/js/admin.js',
-            array('jquery', 'jquery-ui-sortable', 'wp-media'),
+            array('jquery', 'jquery-ui-sortable'),
             LSFD_PLUGIN_VERSION,
             true
         );

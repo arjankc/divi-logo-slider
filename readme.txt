@@ -4,7 +4,7 @@ Donate link: https://github.com/Gurkha-Technology-Open-Source
 Tags: divi, logo, slider, carousel, logo slider, logo carousel, divi module, admin dashboard, partners, clients
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.0.0
+Stable tag: 1.0.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,13 @@ Yes, you can add alt text to each logo for better accessibility and SEO. Links a
 5. Frontend - Mobile responsive view
 
 == Changelog ==
+
+= 1.0.2 =
+* Packaging: Ensure zip includes a single `logo-slider-for-divi` directory to prevent side-by-side duplicates. Additional safety guards.
+
+= 1.0.1 =
+* Fix: Media Library button not working on admin page. Removed invalid 'wp-media' script dependency and rely on wp_enqueue_media().
+* Fix: Guard constants and main class to avoid "already defined" warnings if multiple copies are installed.
 
 = 1.0.0 =
 * Initial release

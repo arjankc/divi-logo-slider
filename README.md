@@ -232,6 +232,13 @@ This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) 
 
 ## 🔄 Changelog
 
+### v1.0.1
+- Fix: Media Library not opening from admin "Select Image" button due to invalid script dependency. Removed bad dependency and ensured `wp_enqueue_media()` is loaded only on our admin page.
+- Fix: Prevent "constant already defined" warnings if more than one copy of the plugin is present by guarding constants and main class definitions.
+
+### v1.0.2
+- Packaging: Ensure zip contains a single top-level `logo-slider-for-divi` folder to avoid duplicate installs. Additional guards for safer activation.
+
 ### v1.0.0 (Initial Release)
 - ✅ Centralized logo management dashboard
 - ✅ Divi Builder module integration

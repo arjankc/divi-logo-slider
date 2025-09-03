@@ -3,7 +3,7 @@
  * Plugin Name: Logo Slider for Divi
  * Plugin URI: https://github.com/Gurkha-Technology-Open-Source/divi-logo-slider
  * Description: A Divi module to display a logo slider with centralized admin management.
- * Version: 1.0.0
+ * Version: 1.0.2
  * Author: Gurkha Technology
  * Author URI: https://github.com/Gurkha-Technology-Open-Source
  * Text Domain: logo-slider-for-divi
@@ -17,15 +17,24 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Define plugin constants
-define('LSFD_PLUGIN_VERSION', '1.0.0');
-define('LSFD_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('LSFD_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('LSFD_PLUGIN_FILE', __FILE__);
+// Define plugin constants (guarded to avoid redefinition if multiple copies are present)
+if (!defined('LSFD_PLUGIN_VERSION')) {
+    define('LSFD_PLUGIN_VERSION', '1.0.2');
+}
+if (!defined('LSFD_PLUGIN_DIR')) {
+    define('LSFD_PLUGIN_DIR', plugin_dir_path(__FILE__));
+}
+if (!defined('LSFD_PLUGIN_URL')) {
+    define('LSFD_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
+if (!defined('LSFD_PLUGIN_FILE')) {
+    define('LSFD_PLUGIN_FILE', __FILE__);
+}
 
 /**
  * Main Plugin Class
  */
+if (!class_exists('LogoSliderForDiviPlugin')) {
 class LogoSliderForDiviPlugin {
     
     private static $instance = null;
@@ -88,6 +97,7 @@ class LogoSliderForDiviPlugin {
             'rewrite' => false,
         ));
     }
+}
 }
 
 // Initialize the plugin
